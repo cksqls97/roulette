@@ -160,6 +160,13 @@ function App() {
     });
   };
 
+  const resetAllTimers = () => {
+    if (confirm('모든 타이머와 카운터를 정말 초기화하시겠습니까?')) {
+      setTimers(initialTimers);
+      setLinerBanCount(0);
+    }
+  };
+
   const updateTimer = (key: TimerKey, addSeconds: number) => {
     setTimers(prev => {
       const newTime = Math.max(0, prev[key].timeRemaining + addSeconds);
@@ -345,7 +352,7 @@ function App() {
           </div>
 
           {/* Global Controls */}
-          <div className="glass-card active" style={{ marginTop: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '1rem' }}>
+          <div className="glass-card active" style={{ marginTop: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '0.5rem' }}>
             <button
               className="action-btn time-add"
               style={{ flex: 1, justifyContent: 'center', fontSize: '1.25rem' }}
@@ -361,6 +368,14 @@ function App() {
               title="모든 타이머 일시정지"
             >
               <PauseIcon /> <span style={{ marginLeft: '8px' }}>일괄 정지</span>
+            </button>
+            <button
+              className="action-btn count-add"
+              style={{ flex: 1, justifyContent: 'center', fontSize: '1.25rem' }}
+              onClick={resetAllTimers}
+              title="모든 타이머 및 카운터 초기화"
+            >
+              <ResetIcon /> <span style={{ marginLeft: '8px' }}>일괄 초기화</span>
             </button>
           </div>
         </section>
