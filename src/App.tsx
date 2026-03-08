@@ -64,6 +64,7 @@ function App() {
     return saved ? JSON.parse(saved) : 0;
   });
   const [editingTimerKey, setEditingTimerKey] = useState<TimerKey | null>(null);
+  const [editHours, setEditHours] = useState<string>('');
   const [editMinutes, setEditMinutes] = useState<string>('');
   const [editSeconds, setEditSeconds] = useState<string>('');
 
@@ -153,17 +154,20 @@ function App() {
 
   const handleTimeClick = (key: TimerKey, currentSeconds: number) => {
     setEditingTimerKey(key);
-    const m = Math.floor(currentSeconds / 60);
+    const h = Math.floor(currentSeconds / 3600);
+    const m = Math.floor((currentSeconds % 3600) / 60);
     const s = currentSeconds % 60;
+    setEditHours(h.toString());
     setEditMinutes(m.toString());
     setEditSeconds(s.toString());
   };
 
   const handleTimeSubmit = (e: React.FormEvent, key: TimerKey) => {
     e.preventDefault();
+    const h = parseInt(editHours) || 0;
     const m = parseInt(editMinutes) || 0;
     const s = parseInt(editSeconds) || 0;
-    const newTotalSeconds = m * 60 + s;
+    const newTotalSeconds = h * 3600 + m * 60 + s;
     
     setTimers(prev => ({
       ...prev,
@@ -205,9 +209,19 @@ function App() {
                       <input
                         type="number"
                         min="0"
+                        value={editHours}
+                        onChange={(e) => setEditHours(e.target.value)}
+                        autoFocus
+                        onFocus={(e) => e.target.select()}
+                        className="inline-time-input"
+                      />
+                      <span className="time-separator">:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
                         value={editMinutes}
                         onChange={(e) => setEditMinutes(e.target.value)}
-                        autoFocus
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
                       />
@@ -279,10 +293,6 @@ function App() {
         <section className="roulette-section">
           <h2 className="title-font">룰렛 결과 적용</h2>
           <div className="actions-list">
-            <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>
-              <span>스킬 금지</span>
-              <span className="action-desc">+5분</span>
-            </button>
             <button className="action-btn time-add" onClick={() => handleRoulette('space10m')}>
               <span>스페 금지</span>
               <span className="action-desc">+10분</span>
@@ -299,12 +309,16 @@ function App() {
               <span>스페 금지</span>
               <span className="action-desc">+30분</span>
             </button>
-            <button className="action-btn time-add" onClick={() => handleRoulette('mount30m')}>
-              <span>탈것 금지</span>
-              <span className="action-desc">+30분</span>
+            <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>
+              <span>스킬 금지</span>
+              <span className="action-desc">+5분</span>
             </button>
             <button className="action-btn time-add" onClick={() => handleRoulette('skillLvl1_30m')}>
               <span>스킬 all 1렙</span>
+              <span className="action-desc">+30분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('mount30m')}>
+              <span>탈것 금지</span>
               <span className="action-desc">+30분</span>
             </button>
             <button className="action-btn count-add" onClick={() => handleRoulette('liner3')}>
