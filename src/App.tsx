@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 type TimerKey = 'space' | 'mount' | 'bifrost' | 'skill' | 'skillLvl1' | 'smoke';
@@ -67,6 +67,35 @@ function App() {
   const [editHours, setEditHours] = useState<string>('');
   const [editMinutes, setEditMinutes] = useState<string>('');
   const [editSeconds, setEditSeconds] = useState<string>('');
+  const editFormRef = useRef<HTMLFormElement | null>(null);
+
+  // Click outside to submit
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (editFormRef.current && !editFormRef.current.contains(event.target as Node)) {
+        if (editingTimerKey) {
+          // Manually trigger submit logic
+          const h = parseInt(editHours) || 0;
+          const m = parseInt(editMinutes) || 0;
+          const s = parseInt(editSeconds) || 0;
+          const newTotalSeconds = h * 3600 + m * 60 + s;
+          
+          setTimers(prev => ({
+            ...prev,
+            [editingTimerKey]: {
+              ...prev[editingTimerKey],
+              timeRemaining: Math.max(0, newTotalSeconds)
+            }
+          }));
+          setEditingTimerKey(null);
+        }
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [editingTimerKey, editHours, editMinutes, editSeconds]);
 
   // Save to localStorage whenever state changes
   useEffect(() => {
@@ -224,6 +253,7 @@ function App() {
                 <div className="time-display title-font">
                   {editingTimerKey === key ? (
                     <form 
+                      ref={editFormRef}
                       className="inline-edit-form"
                       onSubmit={(e) => handleTimeSubmit(e, key)}
                       onKeyDown={(e) => handleTimeKeyDown(e)}
