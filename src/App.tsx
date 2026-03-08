@@ -266,10 +266,11 @@ function App() {
                       onKeyDown={(e) => handleTimeKeyDown(e)}
                     >
                       <input
-                        type="number"
-                        min="0"
-                        value={editHours.replace(/^0+/, '') || '0'}
-                        onChange={(e) => setEditHours(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={2}
+                        value={editHours}
+                        onChange={(e) => setEditHours(e.target.value.replace(/[^0-9]/g, ''))}
                         onBlur={(e) => setEditHours(e.target.value.padStart(2, '0'))}
                         autoFocus
                         onFocus={(e) => e.target.select()}
@@ -277,22 +278,22 @@ function App() {
                       />
                       <span className="time-separator">:</span>
                       <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={editMinutes.replace(/^0+/, '') || '0'}
-                        onChange={(e) => setEditMinutes(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={2}
+                        value={editMinutes}
+                        onChange={(e) => setEditMinutes(e.target.value.replace(/[^0-9]/g, ''))}
                         onBlur={(e) => setEditMinutes(e.target.value.padStart(2, '0'))}
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
                       />
                       <span className="time-separator">:</span>
                       <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={editSeconds.replace(/^0+/, '') || '0'}
-                        onChange={(e) => setEditSeconds(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={2}
+                        value={editSeconds}
+                        onChange={(e) => setEditSeconds(e.target.value.replace(/[^0-9]/g, ''))}
                         onBlur={(e) => setEditSeconds(e.target.value.padStart(2, '0'))}
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
