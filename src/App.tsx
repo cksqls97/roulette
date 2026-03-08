@@ -195,6 +195,7 @@ function App() {
       case 'space10m': updateTimer('space', 10 * 60); break;
       case 'mount10m': updateTimer('mount', 10 * 60); break;
       case 'bifrost10m': updateTimer('bifrost', 10 * 60); break;
+      case 'bifrost30m': updateTimer('bifrost', 30 * 60); break;
       case 'space30m': updateTimer('space', 30 * 60); break;
       case 'skill5m': updateTimer('skill', 5 * 60); break;
       case 'skillLvl1_30m': updateTimer('skillLvl1', 30 * 60); break;
@@ -407,6 +408,7 @@ function App() {
               <div className="action-group-header">비프 금지</div>
               <div className="action-group-buttons">
                 <button className="action-btn time-add" onClick={() => handleRoulette('bifrost10m')}>+10분</button>
+                <button className="action-btn time-add" onClick={() => handleRoulette('bifrost30m')}>+30분</button>
               </div>
             </div>
 
