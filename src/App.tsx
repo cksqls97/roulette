@@ -97,6 +97,17 @@ function App() {
     };
   }, [editingTimerKey, editHours, editMinutes, editSeconds]);
 
+  // 1-minute auto-refresh
+  useEffect(() => {
+    const refreshTimer = setTimeout(() => {
+      // Re-save state right before reload just in case
+      localStorage.setItem('broadcastingTimers', JSON.stringify(timers));
+      localStorage.setItem('broadcastingCounter', JSON.stringify(linerBanCount));
+      window.location.reload();
+    }, 60000); // 60 seconds
+    return () => clearTimeout(refreshTimer);
+  }, [timers, linerBanCount]);
+
   // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem('broadcastingTimers', JSON.stringify(timers));
