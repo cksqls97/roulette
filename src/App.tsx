@@ -109,6 +109,28 @@ function App() {
     });
   };
 
+  const setAllTimersActive = (active: boolean) => {
+    setTimers(prev => {
+      const next = { ...prev };
+      let changed = false;
+      for (const key in next) {
+        const k = key as TimerKey;
+        if (active) {
+          if (next[k].timeRemaining > 0 && !next[k].isActive) {
+            next[k] = { ...next[k], isActive: true };
+            changed = true;
+          }
+        } else {
+          if (next[k].isActive) {
+            next[k] = { ...next[k], isActive: false };
+            changed = true;
+          }
+        }
+      }
+      return changed ? next : prev;
+    });
+  };
+
   const updateTimer = (key: TimerKey, addSeconds: number) => {
     setTimers(prev => {
       const newTime = Math.max(0, prev[key].timeRemaining + addSeconds);
@@ -157,9 +179,9 @@ function App() {
     const h = Math.floor(currentSeconds / 3600);
     const m = Math.floor((currentSeconds % 3600) / 60);
     const s = currentSeconds % 60;
-    setEditHours(h.toString());
-    setEditMinutes(m.toString());
-    setEditSeconds(s.toString());
+    setEditHours(h.toString().padStart(2, '0'));
+    setEditMinutes(m.toString().padStart(2, '0'));
+    setEditSeconds(s.toString().padStart(2, '0'));
   };
 
   const handleTimeSubmit = (e: React.FormEvent, key: TimerKey) => {
@@ -209,8 +231,9 @@ function App() {
                       <input
                         type="number"
                         min="0"
-                        value={editHours}
+                        value={editHours.replace(/^0+/, '') || '0'}
                         onChange={(e) => setEditHours(e.target.value)}
+                        onBlur={(e) => setEditHours(e.target.value.padStart(2, '0'))}
                         autoFocus
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
@@ -220,8 +243,9 @@ function App() {
                         type="number"
                         min="0"
                         max="59"
-                        value={editMinutes}
+                        value={editMinutes.replace(/^0+/, '') || '0'}
                         onChange={(e) => setEditMinutes(e.target.value)}
+                        onBlur={(e) => setEditMinutes(e.target.value.padStart(2, '0'))}
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
                       />
@@ -230,8 +254,9 @@ function App() {
                         type="number"
                         min="0"
                         max="59"
-                        value={editSeconds}
+                        value={editSeconds.replace(/^0+/, '') || '0'}
                         onChange={(e) => setEditSeconds(e.target.value)}
+                        onBlur={(e) => setEditSeconds(e.target.value.padStart(2, '0'))}
                         onFocus={(e) => e.target.select()}
                         className="inline-time-input"
                       />
@@ -287,6 +312,26 @@ function App() {
                 </button>
               </div>
             </div>
+          </div>
+
+          {/* Global Controls */}
+          <div className="glass-card active" style={{ marginTop: '0.5rem', padding: '1rem', display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '1rem' }}>
+            <button
+              className="action-btn time-add"
+              style={{ flex: 1, justifyContent: 'center', fontSize: '1.25rem' }}
+              onClick={() => setAllTimersActive(true)}
+              title="모든 타이머 일괄 재생"
+            >
+              <PlayIcon /> <span style={{ marginLeft: '8px' }}>일괄 재생</span>
+            </button>
+            <button
+              className="action-btn"
+              style={{ flex: 1, justifyContent: 'center', fontSize: '1.25rem', borderColor: 'var(--text-muted)' }}
+              onClick={() => setAllTimersActive(false)}
+              title="모든 타이머 일시정지"
+            >
+              <PauseIcon /> <span style={{ marginLeft: '8px' }}>일괄 정지</span>
+            </button>
           </div>
         </section>
 
