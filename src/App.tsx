@@ -80,12 +80,12 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const toggleTimer = (key: TimerKey) => {
+  const setTimerActive = (key: TimerKey, active: boolean) => {
     setTimers(prev => {
-      if (prev[key].timeRemaining <= 0) return prev;
+      if (prev[key].timeRemaining <= 0 && active) return prev;
       return {
         ...prev,
-        [key]: { ...prev[key], isActive: !prev[key].isActive }
+        [key]: { ...prev[key], isActive: active }
       };
     });
   };
@@ -135,27 +135,8 @@ function App() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <h1 className="title-font">Broadcasting Timer</h1>
-      </header>
-
       <main className="main-content">
         <section className="dashboard-section">
-          {/* Counter Section */}
-          <div className="glass-card active">
-            <div className="card-header">
-              <h3 className="card-title">대륙 이동 정기선 금지</h3>
-            </div>
-            <div className="counter-display title-font">{linerBanCount}회</div>
-            <div className="controls-row">
-              <button className="icon-btn" onClick={() => setLinerBanCount(Math.max(0, linerBanCount - 1))}>-1</button>
-              <button className="icon-btn primary" onClick={() => setLinerBanCount(linerBanCount + 1)}>+1</button>
-              <button className="icon-btn danger" onClick={() => setLinerBanCount(0)} title="Reset">
-                <ResetIcon />
-              </button>
-            </div>
-          </div>
-
           {/* Timers Grid */}
           <div className="timers-grid">
             {(Object.entries(timers) as [TimerKey, TimerState][]).map(([key, state]) => (
@@ -172,33 +153,59 @@ function App() {
                 <div className="controls-row">
                   <button
                     className={`icon-btn ${state.isActive ? 'primary' : ''}`}
-                    onClick={() => toggleTimer(key)}
-                    disabled={state.timeRemaining <= 0}
+                    onClick={() => setTimerActive(key, true)}
+                    disabled={state.timeRemaining <= 0 || state.isActive}
+                    title="시작"
                   >
-                    {state.isActive ? <PauseIcon /> : <PlayIcon />}
+                    <PlayIcon />
                   </button>
-                  <button className="icon-btn danger" onClick={() => resetTimer(key)}>
+                  <button
+                    className="icon-btn"
+                    onClick={() => setTimerActive(key, false)}
+                    disabled={!state.isActive}
+                    title="일시정지"
+                  >
+                    <PauseIcon />
+                  </button>
+                  <button className="icon-btn danger" onClick={() => resetTimer(key)} title="초기화">
                     <ResetIcon />
                   </button>
                 </div>
-                <div className="manual-adjust">
-                  <button className="adjust-btn" onClick={() => updateTimer(key, -60)}>-1m</button>
-                  <button className="adjust-btn" onClick={() => updateTimer(key, 60)}>+1m</button>
-                  <button className="adjust-btn" onClick={() => updateTimer(key, 5 * 60)}>+5m</button>
-                  <button className="adjust-btn" onClick={() => updateTimer(key, 10 * 60)}>+10m</button>
-                </div>
+                <form className="manual-adjust" onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = new FormData(e.currentTarget);
+                  const mins = Number(form.get('minutes'));
+                  if (mins) updateTimer(key, mins * 60);
+                  e.currentTarget.reset();
+                }}>
+                  <input name="minutes" type="number" placeholder="분" className="time-input" />
+                  <button type="submit" className="adjust-btn">적용</button>
+                </form>
               </div>
             ))}
+          </div>
+
+          {/* Counter Section moved to bottom */}
+          <div className="glass-card active">
+            <div className="card-header">
+              <h3 className="card-title">대륙 이동 정기선 금지</h3>
+            </div>
+            <div className="controls-row" style={{ marginTop: 0, justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="counter-display title-font" style={{ margin: 0, fontSize: '3rem' }}>{linerBanCount}회</div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="icon-btn" onClick={() => setLinerBanCount(Math.max(0, linerBanCount - 1))}>-1</button>
+                <button className="icon-btn primary" onClick={() => setLinerBanCount(linerBanCount + 1)}>+1</button>
+                <button className="icon-btn danger" onClick={() => setLinerBanCount(0)} title="Reset">
+                  <ResetIcon />
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
         <section className="roulette-section">
           <h2 className="title-font">룰렛 결과 적용</h2>
           <div className="actions-list">
-            <button className="action-btn neutral" onClick={() => handleRoulette('none')}>
-              <span>꽝 / 찌트</span>
-              <span className="action-desc">변화 없음</span>
-            </button>
             <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>
               <span>스킬 금지</span>
               <span className="action-desc">+5분</span>
