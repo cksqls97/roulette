@@ -383,64 +383,61 @@ function App() {
 
         <section className="roulette-section">
           <h2 className="title-font">룰렛 결과 적용</h2>
-          <div className="actions-list">
-            {/* 스페 금지 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('space10m')}>
-              <span>스페 금지</span>
-              <span className="action-desc">+10분</span>
-            </button>
-            <button className="action-btn time-add" onClick={() => handleRoulette('space30m')}>
-              <span>스페 금지</span>
-              <span className="action-desc">+30분</span>
-            </button>
-            <button className="action-btn time-add" onClick={() => handleRoulette('space1h')}>
-              <span>스페 금지</span>
-              <span className="action-desc">+1시간</span>
-            </button>
+          <div className="actions-grouped-list">
+            
+            <div className="action-group">
+              <div className="action-group-header">스페 금지</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('space10m')}>+10분</button>
+                <button className="action-btn time-add" onClick={() => handleRoulette('space30m')}>+30분</button>
+                <button className="action-btn time-add" onClick={() => handleRoulette('space1h')}>+1시간</button>
+              </div>
+            </div>
 
-            {/* 탈것 금지 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('mount10m')}>
-              <span>탈것 금지</span>
-              <span className="action-desc">+10분</span>
-            </button>
-            <button className="action-btn time-add" onClick={() => handleRoulette('mount30m')}>
-              <span>탈것 금지</span>
-              <span className="action-desc">+30분</span>
-            </button>
-            <button className="action-btn time-add" onClick={() => handleRoulette('mount1h')}>
-              <span>탈것 금지</span>
-              <span className="action-desc">+1시간</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">탈것 금지</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('mount10m')}>+10분</button>
+                <button className="action-btn time-add" onClick={() => handleRoulette('mount30m')}>+30분</button>
+                <button className="action-btn time-add" onClick={() => handleRoulette('mount1h')}>+1시간</button>
+              </div>
+            </div>
 
-            {/* 비프 금지 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('bifrost10m')}>
-              <span>비프 금지</span>
-              <span className="action-desc">+10분</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">비프 금지</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('bifrost10m')}>+10분</button>
+              </div>
+            </div>
 
-            {/* 스킬 금지 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>
-              <span>스킬 금지</span>
-              <span className="action-desc">+5분</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">스킬 금지</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>+5분</button>
+              </div>
+            </div>
 
-            {/* 스킬 all 1렙 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('skillLvl1_30m')}>
-              <span>스킬 all 1렙</span>
-              <span className="action-desc">+30분</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">스킬 all 1렙</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('skillLvl1_30m')}>+30분</button>
+              </div>
+            </div>
 
-            {/* 금연 */}
-            <button className="action-btn time-add" onClick={() => handleRoulette('smoke3h')}>
-              <span>금연</span>
-              <span className="action-desc">+3시간</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">금연</div>
+              <div className="action-group-buttons">
+                <button className="action-btn time-add" onClick={() => handleRoulette('smoke3h')}>+3시간</button>
+              </div>
+            </div>
 
-            {/* 대륙 정기선 */}
-            <button className="action-btn count-add" onClick={() => handleRoulette('liner3')}>
-              <span>대륙 이동 정기선 금지</span>
-              <span className="action-desc">+3회</span>
-            </button>
+            <div className="action-group">
+              <div className="action-group-header">대륙 이동 정기선 금지</div>
+              <div className="action-group-buttons">
+                <button className="action-btn count-add" onClick={() => handleRoulette('liner3')}>+3회</button>
+              </div>
+            </div>
+
           </div>
         </section>
       </main>
