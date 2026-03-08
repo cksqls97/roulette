@@ -1,0 +1,253 @@
+import { useState, useEffect } from 'react';
+import './App.css';
+
+type TimerKey = 'space' | 'mount' | 'bifrost' | 'skill' | 'skillLvl1' | 'smoke';
+
+interface TimerState {
+  timeRemaining: number; // in seconds
+  isActive: boolean;
+}
+
+const initialTimers: Record<TimerKey, TimerState> = {
+  space: { timeRemaining: 0, isActive: false },
+  mount: { timeRemaining: 0, isActive: false },
+  bifrost: { timeRemaining: 0, isActive: false },
+  skill: { timeRemaining: 0, isActive: false },
+  skillLvl1: { timeRemaining: 0, isActive: false },
+  smoke: { timeRemaining: 0, isActive: false },
+};
+
+const TIMER_LABELS: Record<TimerKey, string> = {
+  space: '스페 금지',
+  mount: '탈것 금지',
+  bifrost: '비프 금지',
+  skill: '스킬 금지',
+  skillLvl1: '스킬 all 1렙',
+  smoke: '금연'
+};
+
+function formatTime(seconds: number): string {
+  if (seconds <= 0) return '00:00:00';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// Icons (SVG strings to avoid dependencies)
+const PlayIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+  </svg>
+);
+
+const ResetIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+
+function App() {
+  const [timers, setTimers] = useState<Record<TimerKey, TimerState>>(initialTimers);
+  const [linerBanCount, setLinerBanCount] = useState<number>(0);
+
+  // Global Tick
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimers(prev => {
+        let hasChanges = false;
+        const next = { ...prev };
+        for (const key in next) {
+          const k = key as TimerKey;
+          if (next[k].isActive && next[k].timeRemaining > 0) {
+            next[k] = { ...next[k], timeRemaining: next[k].timeRemaining - 1 };
+            hasChanges = true;
+            if (next[k].timeRemaining === 0) {
+              next[k].isActive = false;
+            }
+          }
+        }
+        return hasChanges ? next : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleTimer = (key: TimerKey) => {
+    setTimers(prev => {
+      if (prev[key].timeRemaining <= 0) return prev;
+      return {
+        ...prev,
+        [key]: { ...prev[key], isActive: !prev[key].isActive }
+      };
+    });
+  };
+
+  const updateTimer = (key: TimerKey, addSeconds: number) => {
+    setTimers(prev => {
+      const newTime = Math.max(0, prev[key].timeRemaining + addSeconds);
+      return {
+        ...prev,
+        [key]: {
+          ...prev[key],
+          timeRemaining: newTime,
+          // Auto-start if time is added and it wasn't active (optional, let's keep it manual unless specified, wait - user said "자동 반영되도록 할거야", so let's auto-start if we add time from roulette, or just keep active state)
+          // Let's auto-start if > 0
+          isActive: newTime > 0 ? true : false
+        }
+      };
+    });
+  };
+
+  const resetTimer = (key: TimerKey) => {
+    setTimers(prev => ({
+      ...prev,
+      [key]: { timeRemaining: 0, isActive: false }
+    }));
+  };
+
+  const handleRoulette = (action: string) => {
+    switch (action) {
+      case 'space10m': updateTimer('space', 10 * 60); break;
+      case 'mount10m': updateTimer('mount', 10 * 60); break;
+      case 'bifrost10m': updateTimer('bifrost', 10 * 60); break;
+      case 'space30m': updateTimer('space', 30 * 60); break;
+      case 'skill5m': updateTimer('skill', 5 * 60); break;
+      case 'skillLvl1_30m': updateTimer('skillLvl1', 30 * 60); break;
+      case 'mount30m': updateTimer('mount', 30 * 60); break;
+      case 'liner3': setLinerBanCount(prev => prev + 3); break;
+      case 'space1h': updateTimer('space', 60 * 60); break;
+      case 'mount1h': updateTimer('mount', 60 * 60); break;
+      case 'smoke3h': updateTimer('smoke', 3 * 60 * 60); break;
+      case 'none':
+      default:
+        // No change
+        break;
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <header className="app-header">
+        <h1 className="title-font">Broadcasting Timer</h1>
+      </header>
+
+      <main className="main-content">
+        <section className="dashboard-section">
+          {/* Counter Section */}
+          <div className="glass-card active">
+            <div className="card-header">
+              <h3 className="card-title">대륙 이동 정기선 금지</h3>
+            </div>
+            <div className="counter-display title-font">{linerBanCount}회</div>
+            <div className="controls-row">
+              <button className="icon-btn" onClick={() => setLinerBanCount(Math.max(0, linerBanCount - 1))}>-1</button>
+              <button className="icon-btn primary" onClick={() => setLinerBanCount(linerBanCount + 1)}>+1</button>
+              <button className="icon-btn danger" onClick={() => setLinerBanCount(0)} title="Reset">
+                <ResetIcon />
+              </button>
+            </div>
+          </div>
+
+          {/* Timers Grid */}
+          <div className="timers-grid">
+            {(Object.entries(timers) as [TimerKey, TimerState][]).map(([key, state]) => (
+              <div key={key} className={`glass-card ${state.isActive ? 'active' : ''}`}>
+                <div className="card-header">
+                  <h3 className="card-title">
+                    <span className="status-indicator"></span>
+                    {TIMER_LABELS[key]}
+                  </h3>
+                </div>
+                <div className="time-display title-font">
+                  {formatTime(state.timeRemaining)}
+                </div>
+                <div className="controls-row">
+                  <button
+                    className={`icon-btn ${state.isActive ? 'primary' : ''}`}
+                    onClick={() => toggleTimer(key)}
+                    disabled={state.timeRemaining <= 0}
+                  >
+                    {state.isActive ? <PauseIcon /> : <PlayIcon />}
+                  </button>
+                  <button className="icon-btn danger" onClick={() => resetTimer(key)}>
+                    <ResetIcon />
+                  </button>
+                </div>
+                <div className="manual-adjust">
+                  <button className="adjust-btn" onClick={() => updateTimer(key, -60)}>-1m</button>
+                  <button className="adjust-btn" onClick={() => updateTimer(key, 60)}>+1m</button>
+                  <button className="adjust-btn" onClick={() => updateTimer(key, 5 * 60)}>+5m</button>
+                  <button className="adjust-btn" onClick={() => updateTimer(key, 10 * 60)}>+10m</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="roulette-section">
+          <h2 className="title-font">룰렛 결과 적용</h2>
+          <div className="actions-list">
+            <button className="action-btn neutral" onClick={() => handleRoulette('none')}>
+              <span>꽝 / 찌트</span>
+              <span className="action-desc">변화 없음</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('skill5m')}>
+              <span>스킬 금지</span>
+              <span className="action-desc">+5분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('space10m')}>
+              <span>스페 금지</span>
+              <span className="action-desc">+10분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('mount10m')}>
+              <span>탈것 금지</span>
+              <span className="action-desc">+10분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('bifrost10m')}>
+              <span>비프 금지</span>
+              <span className="action-desc">+10분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('space30m')}>
+              <span>스페 금지</span>
+              <span className="action-desc">+30분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('mount30m')}>
+              <span>탈것 금지</span>
+              <span className="action-desc">+30분</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('skillLvl1_30m')}>
+              <span>스킬 all 1렙</span>
+              <span className="action-desc">+30분</span>
+            </button>
+            <button className="action-btn count-add" onClick={() => handleRoulette('liner3')}>
+              <span>대륙 이동 정기선 금지</span>
+              <span className="action-desc">+3회</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('space1h')}>
+              <span>스페 금지</span>
+              <span className="action-desc">+1시간</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('mount1h')}>
+              <span>탈것 금지</span>
+              <span className="action-desc">+1시간</span>
+            </button>
+            <button className="action-btn time-add" onClick={() => handleRoulette('smoke3h')}>
+              <span>금연</span>
+              <span className="action-desc">+3시간</span>
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export default App;
