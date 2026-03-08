@@ -55,8 +55,26 @@ const ResetIcon = () => (
 );
 
 function App() {
-  const [timers, setTimers] = useState<Record<TimerKey, TimerState>>(initialTimers);
-  const [linerBanCount, setLinerBanCount] = useState<number>(0);
+  const [timers, setTimers] = useState<Record<TimerKey, TimerState>>(() => {
+    const saved = localStorage.getItem('broadcastingTimers');
+    return saved ? JSON.parse(saved) : initialTimers;
+  });
+  const [linerBanCount, setLinerBanCount] = useState<number>(() => {
+    const saved = localStorage.getItem('broadcastingCounter');
+    return saved ? JSON.parse(saved) : 0;
+  });
+  const [editingTimerKey, setEditingTimerKey] = useState<TimerKey | null>(null);
+  const [editMinutes, setEditMinutes] = useState<string>('');
+  const [editSeconds, setEditSeconds] = useState<string>('');
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('broadcastingTimers', JSON.stringify(timers));
+  }, [timers]);
+
+  useEffect(() => {
+    localStorage.setItem('broadcastingCounter', JSON.stringify(linerBanCount));
+  }, [linerBanCount]);
 
   // Global Tick
   useEffect(() => {
@@ -133,6 +151,36 @@ function App() {
     }
   };
 
+  const handleTimeClick = (key: TimerKey, currentSeconds: number) => {
+    setEditingTimerKey(key);
+    const m = Math.floor(currentSeconds / 60);
+    const s = currentSeconds % 60;
+    setEditMinutes(m.toString());
+    setEditSeconds(s.toString());
+  };
+
+  const handleTimeSubmit = (e: React.FormEvent, key: TimerKey) => {
+    e.preventDefault();
+    const m = parseInt(editMinutes) || 0;
+    const s = parseInt(editSeconds) || 0;
+    const newTotalSeconds = m * 60 + s;
+    
+    setTimers(prev => ({
+      ...prev,
+      [key]: {
+        ...prev[key],
+        timeRemaining: Math.max(0, newTotalSeconds)
+      }
+    }));
+    setEditingTimerKey(null);
+  };
+
+  const handleTimeKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setEditingTimerKey(null);
+    }
+  };
+
   return (
     <div className="app-container">
       <main className="main-content">
@@ -148,7 +196,42 @@ function App() {
                   </h3>
                 </div>
                 <div className="time-display title-font">
-                  {formatTime(state.timeRemaining)}
+                  {editingTimerKey === key ? (
+                    <form 
+                      className="inline-edit-form"
+                      onSubmit={(e) => handleTimeSubmit(e, key)}
+                      onKeyDown={(e) => handleTimeKeyDown(e)}
+                    >
+                      <input
+                        type="number"
+                        min="0"
+                        value={editMinutes}
+                        onChange={(e) => setEditMinutes(e.target.value)}
+                        autoFocus
+                        onFocus={(e) => e.target.select()}
+                        className="inline-time-input"
+                      />
+                      <span className="time-separator">:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
+                        value={editSeconds}
+                        onChange={(e) => setEditSeconds(e.target.value)}
+                        onFocus={(e) => e.target.select()}
+                        className="inline-time-input"
+                      />
+                      <button type="submit" style={{ display: 'none' }}>저장</button>
+                    </form>
+                  ) : (
+                    <span 
+                      onClick={() => handleTimeClick(key, state.timeRemaining)}
+                      style={{ cursor: 'pointer' }}
+                      title="클릭하여 시간 수정"
+                    >
+                      {formatTime(state.timeRemaining)}
+                    </span>
+                  )}
                 </div>
                 <div className="controls-row">
                   <button
@@ -171,16 +254,6 @@ function App() {
                     <ResetIcon />
                   </button>
                 </div>
-                <form className="manual-adjust" onSubmit={(e) => {
-                  e.preventDefault();
-                  const form = new FormData(e.currentTarget);
-                  const mins = Number(form.get('minutes'));
-                  if (mins) updateTimer(key, mins * 60);
-                  e.currentTarget.reset();
-                }}>
-                  <input name="minutes" type="number" placeholder="분" className="time-input" />
-                  <button type="submit" className="adjust-btn">적용</button>
-                </form>
               </div>
             ))}
           </div>
